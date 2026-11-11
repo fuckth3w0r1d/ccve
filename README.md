@@ -5,7 +5,6 @@
 ## 结构
 
 ```
-AGENTS.md                常驻规则，会话启动时自动加载
 extensions/ccve/         /ccve 命令与任务说明 brief.md
 tools/container.ts       调试容器工具，管起停与命令执行
 skills/                  五个审计技能

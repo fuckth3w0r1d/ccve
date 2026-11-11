@@ -21,7 +21,7 @@ if [ $i -ge 60 ]; then
 	exit 1
 fi
 
-HOSTPORT=${HOSTPORT:-<hostport>}
+HOSTPORT="${HOSTPORT:?set HOSTPORT to the host port this poc exposes}"
 CMD=${CMD:-id > /win.txt}
 python3 exp/exploit.py 127.0.0.1 "$HOSTPORT" "$CMD"
 

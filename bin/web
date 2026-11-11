@@ -7,6 +7,12 @@ mkdir -p "$ROOT/logs"
 
 export PI_CODING_AGENT_DIR="${PI_CODING_AGENT_DIR:-$HOME/.omp/agent}"
 
+if [ "$1" = "stop" ]; then
+	pkill -f "ompweb host" 2>/dev/null && echo "host: stopped" || echo "host: not running"
+	pkill -f "ompweb --port" 2>/dev/null && echo "web: stopped" || echo "web: not running"
+	exit 0
+fi
+
 if pgrep -f "ompweb host" >/dev/null 2>&1; then
 	echo "host: already running"
 else

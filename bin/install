@@ -4,7 +4,7 @@ set -e
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 AGENT_DIR="${PI_CODING_AGENT_DIR:-$HOME/.omp/agent}"
 
-mkdir -p "$AGENT_DIR/skills" "$AGENT_DIR/tools"
+mkdir -p "$AGENT_DIR/skills" "$AGENT_DIR/tools" "$AGENT_DIR/extensions/ccve"
 
 for dir in "$ROOT"/skills/*/; do
 	name="$(basename "$dir")"
@@ -15,13 +15,17 @@ done
 ln -sfn "$ROOT/tools/container.ts" "$AGENT_DIR/tools/container.ts"
 echo "tool: container"
 
-mkdir -p "$AGENT_DIR/extensions/ccve"
 ln -sfn "$ROOT/extensions/ccve/index.ts" "$AGENT_DIR/extensions/ccve/index.ts"
+ln -sfn "$ROOT/extensions/ccve/brief.md" "$AGENT_DIR/extensions/ccve/brief.md"
 echo "extension: ccve"
 
-if docker image inspect ccve-debug >/dev/null 2>&1; then
-	echo "image: ccve-debug (exists)"
-else
-	docker build -t ccve-debug "$ROOT/images/debug"
-	echo "image: ccve-debug (built)"
-fi
+for dockerfile in "$ROOT"/images/debug/*.Dockerfile; do
+	distro="$(basename "$dockerfile" .Dockerfile)"
+	tag="ccve-debug:$distro"
+	if docker image inspect "$tag" >/dev/null 2>&1; then
+		echo "image: $tag (exists)"
+	else
+		docker build -f "$dockerfile" -t "$tag" "$ROOT/images/debug"
+		echo "image: $tag (built)"
+	fi
+done
