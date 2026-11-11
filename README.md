@@ -8,15 +8,15 @@
 extensions/ccve/         /ccve 命令与任务说明 brief.md
 tools/container.ts       调试容器工具，管起停与命令执行
 skills/                  五个审计技能
-images/debug/            调试镜像：gdb、pwndbg、pwntools、ROPgadget 等
+images/debug/            调试镜像，每个发行版一份 Dockerfile
 templates/poc/           产出仓库骨架
 bin/install              软链技能、工具、扩展，构建镜像
-bin/web                  起 ompweb 的会话宿主与 web 服务
+bin/web                  起停 ompweb 的会话宿主与 web 服务
 board.md                 已挖掘目标，开工前读
 work/<target>/           每个目标的工作目录
 ```
 
-`work/<target>/` 下分 `state.md`（当前假设与下一步）、`journal.md`（时间线）、`src/`（源码）、`env/`（目标容器定义）、`notes/`（撞车检查与发现）、`exp/`（利用脚本）、`logs/`。
+`work/<target>/` 下分 `state.md`（当前假设与下一步）、`journal.md`（时间线）、`src/`（源码与二进制）、`env/`（复现容器定义）、`notes/`（撞车检查与发现）、`exp/`（利用脚本）、`logs/`。
 
 产出写到与 `ccve` 同级的 `pocs/<target>/`，结构见 `templates/poc/`。
 
@@ -35,6 +35,8 @@ bin/install
 ```
 
 `omp` 用预编译二进制，不依赖 JS 运行时。装完跑一次 `omp` 完成模型供应商授权，凭据落在 `~/.omp/agent/agent.db`。
+
+`bin/install` 会构建各发行版的调试镜像：`ccve-debug:ubuntu-26.04`、`ubuntu-24.04`、`debian-13`、`debian-12`，每个约 700MB，镜像里带的是该发行版自己的 libc。
 
 把配置写进 `~/.omp/agent/config.yml`：
 
@@ -69,6 +71,18 @@ ssh -L 30177:127.0.0.1:30177 <vps>
 
 浏览器打开 `http://localhost:30177`，在 ccve 目录新建会话，输入框执行 `/ccve`。
 
-会话进入 goal 模式，自己选目标、建 `work/<target>/`、做撞车检查、绑定调试容器、开始挖掘。关掉浏览器或断开 SSH 都不影响，`ompweb host` 持有会话进程。
+会话进入 goal 模式，自己选目标、建 `work/<target>/`、做撞车检查、起调试容器、开始挖掘。关掉浏览器或断开 SSH 都不影响，`ompweb host` 持有会话进程。
 
-一个目标占调试容器 1.5 核 2G 加目标容器 1 核 1G，4 核机器上并发两个目标是上限。
+任务结束要收摊：
+
+```sh
+bin/web stop
+```
+
+它停掉 `ompweb host` 与 web 服务，前者是所有 omp 进程的父进程，所以会话一并终止。调试容器独立于 omp，按需清理：
+
+```sh
+docker ps -a --filter label=ccve.id -q | xargs -r docker rm -f
+```
+
+一个目标占调试容器 1.5 核 2G 加复现容器 1 核 1G，4 核机器上并发两个目标是上限。
