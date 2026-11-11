@@ -1,0 +1,32 @@
+#!/bin/sh
+set -e
+
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+PORT="${CCVE_WEB_PORT:-30177}"
+mkdir -p "$ROOT/logs"
+
+export PI_CODING_AGENT_DIR="${PI_CODING_AGENT_DIR:-$HOME/.omp/agent}"
+
+if pgrep -f "ompweb host" >/dev/null 2>&1; then
+	echo "host: already running"
+else
+	setsid ompweb host >"$ROOT/logs/ompweb-host.log" 2>&1 </dev/null &
+	echo "host: started"
+fi
+
+if curl -sf --noproxy '*' -o /dev/null "http://127.0.0.1:$PORT/"; then
+	echo "web: already running on $PORT"
+else
+	setsid ompweb --port "$PORT" --no-open >"$ROOT/logs/ompweb-web.log" 2>&1 </dev/null &
+	i=0
+	while [ $i -lt 30 ]; do
+		if curl -sf --noproxy '*' -o /dev/null "http://127.0.0.1:$PORT/"; then
+			break
+		fi
+		i=$((i + 1))
+		sleep 1
+	done
+	echo "web: http://127.0.0.1:$PORT"
+fi
+
+echo "tunnel: ssh -L $PORT:127.0.0.1:$PORT <vps>"

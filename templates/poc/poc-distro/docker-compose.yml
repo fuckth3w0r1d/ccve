@@ -1,0 +1,9 @@
+services:
+  target:
+    build: .
+    image: <target>-poc-<distro>
+    container_name: <target>-target
+    cpus: 1
+    mem_limit: 1g
+    ports:
+      - "127.0.0.1:<hostport>:<port>"

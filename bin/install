@@ -1,0 +1,27 @@
+#!/bin/sh
+set -e
+
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+AGENT_DIR="${PI_CODING_AGENT_DIR:-$HOME/.omp/agent}"
+
+mkdir -p "$AGENT_DIR/skills" "$AGENT_DIR/tools"
+
+for dir in "$ROOT"/skills/*/; do
+	name="$(basename "$dir")"
+	ln -sfn "$dir" "$AGENT_DIR/skills/$name"
+	echo "skill: $name"
+done
+
+ln -sfn "$ROOT/tools/container.ts" "$AGENT_DIR/tools/container.ts"
+echo "tool: container"
+
+mkdir -p "$AGENT_DIR/extensions/ccve"
+ln -sfn "$ROOT/extensions/ccve/index.ts" "$AGENT_DIR/extensions/ccve/index.ts"
+echo "extension: ccve"
+
+if docker image inspect ccve-debug >/dev/null 2>&1; then
+	echo "image: ccve-debug (exists)"
+else
+	docker build -t ccve-debug "$ROOT/images/debug"
+	echo "image: ccve-debug (built)"
+fi
