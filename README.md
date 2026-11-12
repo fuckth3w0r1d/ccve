@@ -18,7 +18,7 @@ work/<target>/           每个目标的工作目录
 
 `work/<target>/` 下分 `state.md`（当前假设与下一步）、`journal.md`（时间线）、`src/`（源码与二进制）、`env/`（复现容器定义）、`notes/`（撞车检查与发现）、`exp/`（利用脚本）、`logs/`。
 
-产出写到与 `ccve` 同级的 `pocs/<target>/`，结构见 `templates/poc/`。
+产出写到 `pocs/<target>/`，结构见 `templates/poc/`。
 
 ## 部署
 

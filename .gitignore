@@ -1,3 +1,5 @@
 logs/
 work/*
 !work/.gitkeep
+pocs/*
+!pocs/.gitkeep

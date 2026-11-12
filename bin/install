@@ -17,6 +17,7 @@ echo "tool: container"
 
 ln -sfn "$ROOT/extensions/ccve/index.ts" "$AGENT_DIR/extensions/ccve/index.ts"
 ln -sfn "$ROOT/extensions/ccve/brief.md" "$AGENT_DIR/extensions/ccve/brief.md"
+ln -sfn "$ROOT/extensions/ccve/pack.md" "$AGENT_DIR/extensions/ccve/pack.md"
 echo "extension: ccve"
 
 for dockerfile in "$ROOT"/images/debug/*.Dockerfile; do
